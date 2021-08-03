@@ -1,0 +1,107 @@
+---# MidCOM String Database
+---VERSION 2.1.0
+---LANGUAGE fi
+
+---STRING available slot
+Saatavilla oleva aika
+---STRINGEND
+
+---STRING %s of %s planned hours booked
+%sh %s:stä arvioidusta tunnista varattu kalenterista
+---STRINGEND
+
+---STRING booked times
+Aikavaraukset
+---STRINGEND
+
+---STRING calendar
+Kalenteri
+---STRINGEND
+
+---STRING choose calendars
+Valitse näytettävät kalenterit
+---STRINGEND
+
+---STRING create event
+Luo tapahtuma
+---STRINGEND
+
+---STRING dont allow overlapping
+Älä salli päällekkäisiä
+---STRINGEND
+
+---STRING end time
+Päättyy
+---STRINGEND
+
+---STRING event %s
+Tapahtuma %s
+---STRINGEND
+
+---STRING event after
+Seuraava varaus
+---STRINGEND
+
+---STRING event before
+Edellinen varaus
+---STRINGEND
+
+---STRING go to
+Mene ajankohtaan
+---STRINGEND
+
+---STRING groups
+Ryhmät
+---STRINGEND
+
+---STRING location
+Paikka
+---STRINGEND
+
+---STRING me
+Minä
+---STRINGEND
+
+---STRING meeting note for %s on %s by %s
+Palaverin %s muistio, kirjoittanut %s %s
+---STRINGEND
+
+---STRING no event
+Ei tapahtumaa
+---STRINGEND
+
+---STRING org.openpsa.calendar
+Kalenteri
+---STRINGEND
+
+---STRING participants
+Osallistujat
+---STRINGEND
+
+---STRING people
+Henkilöt
+---STRINGEND
+
+---STRING print
+Tulosta
+---STRINGEND
+
+---STRING private event
+Yksityinen tapahtuma
+---STRINGEND
+
+---STRING resources
+Resurssit
+---STRINGEND
+
+---STRING schedule resources
+Aikatauluta resursseja
+---STRINGEND
+
+---STRING start time
+Alkaa
+---STRINGEND
+
+---STRING time
+klo
+---STRINGEND

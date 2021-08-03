@@ -1,0 +1,56 @@
+<Schema xmlns="http://www.midgard-project.org/repligard/1.4">
+    <type name="org_openpsa_event" table="event">
+        <property name="id" type="unsigned integer" primaryfield="id">
+            <description>Local non-replication-safe database identifier</description>
+        </property>
+        <property name="start" type="integer"/>
+        <property name="end" type="integer" field="event_end" />
+        <property name="title" type="string"/>
+        <property name="description" type="text"/>
+        <property name="type" type="integer"/>
+        <property name="extra" type="text"/>
+        <property name="busy" type="boolean"/>
+        <property name="up" upfield="up" type="unsigned integer" link="org_openpsa_event:id"/>
+
+        <property name="location" type="string" />
+        <property name="tentative" type="boolean" />
+        <!-- At least until we have mRFC 0018 -->
+        <property name="externalGuid" type="string" />
+        <!-- At least until we can store arrays with DBA -->
+        <property name="vCalSerialized"  type="text" />
+
+        <property name="orgOpenpsaAccesstype" type="integer"/>
+    </type>
+
+    <type name="org_openpsa_eventmember" table="eventmember" parent="org_openpsa_event">
+        <!-- NewMidgardEventmember properties -->
+        <property name="id" type="unsigned integer" primaryfield="id">
+            <description>Local non-replication-safe database identifier</description>
+        </property>
+        <property name="extra" type="text"/>
+        <property name="uid" link="midgard_person:id" type="unsigned integer"/>
+        <property name="eid" link="org_openpsa_event:id" type="unsigned integer" parentfield="eid"/>
+        <!-- /NewMidgardEventmember properties -->
+
+        <property name="hoursReported" type="integer" />
+    </type>
+
+    <type name="org_openpsa_calendar_resource" table="org_openpsa_calendar_resource">
+        <property name="id" type="unsigned integer" primaryfield="id"/>
+        <property name="title" type="string"/>
+        <property name="description" type="text"/>
+        <property name="location" type="string"/>
+        <property name="capacity" type="float"/>
+    </type>
+
+    <type name="org_openpsa_calendar_event_resource" table="org_openpsa_calendar_event_resource" parent="org_openpsa_event">
+        <property name="id" type="unsigned integer" primaryfield="id">
+            <description>Local non-replication-safe database identifier</description>
+        </property>
+
+        <property name="resource" link="org_openpsa_calendar_resource:id" type="unsigned integer"/>
+        <property name="event" link="org_openpsa_event:id" type="unsigned integer" parentfield="event"/>
+
+        <property name="description" type="text"/>
+    </type>
+</Schema>

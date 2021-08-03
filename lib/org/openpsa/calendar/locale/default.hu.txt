@@ -1,0 +1,91 @@
+---# MidCOM String Database
+---VERSION 2.1.0
+---LANGUAGE hu
+
+---STRING %s of %s planned hours booked
+%s óra van a naptárba bejegyezve a tervezett %s órából
+---STRINGEND
+
+---STRING booked times
+Foglalások
+---STRINGEND
+
+---STRING choose calendars
+Válasszon megjelenítendő naptárt
+---STRINGEND
+
+---STRING create event
+Esemény létrehozása
+---STRINGEND
+
+---STRING dont allow overlapping
+Átfedés megtiltása
+---STRINGEND
+
+---STRING end time
+Befejezés időpontja
+---STRINGEND
+
+---STRING event %s
+%s esemény
+---STRINGEND
+
+---STRING event after
+Esemény után
+---STRINGEND
+
+---STRING event before
+Esemény elött
+---STRINGEND
+
+---STRING go to
+Ugorj
+---STRINGEND
+
+---STRING location
+Helyszín
+---STRINGEND
+
+---STRING me
+Saját
+---STRINGEND
+
+---STRING no event
+Nincs esemény
+---STRINGEND
+
+---STRING org.openpsa.calendar
+Naptár
+---STRINGEND
+
+---STRING participants
+Résztvevők
+---STRINGEND
+
+---STRING print
+Nyomtatás
+---STRINGEND
+
+---STRING schedule resources
+Erőforrások ütemezése
+---STRINGEND
+
+---STRING start time
+Kezdés időpontja
+---STRINGEND
+
+---STRING time
+idő
+---STRINGEND
+
+---STRING available slot
+Rendelkezésre álló idő rubrika
+---STRINGEND
+
+---STRING meeting note for %s on %s by %s
+%s számára jegyzet a %s napi találkozóról %s által
+---STRINGEND
+
+---STRING private event
+Privát esemény
+---STRINGEND

@@ -1,0 +1,31 @@
+org.openpsa.calendar TODO
+=========================
+
+## Tagging
+
+* Support for tagging events
+* Transmit event's tags also to event note wiki pages
+* Enable setting colors for tags, using color of event's first tag in the views
+
+## Calendar subscription
+
+* Subscribing to remote iCalendars via HTTP GET request
+* Multiple calendar subscriptions possible per person
+* Default tags and privacy settings per subscription
+* Updating manually and via cron
+* Subscribed events are read-only
+* iCal Events WordPress plugin may have useful code for this
+
+## Reminders
+
+* Register midcom.services.at processes for firing event reminders
+  some time before event
+* Use org.openpsa.notifications for reminder sending to allow multiple
+  formats like Growl, Email and Jabber
+
+## Travel support and time zones
+
+* Different event schema including From and To (fields that recognize airport
+  codes, city names etc)
+* Recognize time zones for the From and To locations to enable inputting
+  times in local time (to aid entering flights)
