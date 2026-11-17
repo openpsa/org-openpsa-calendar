@@ -28,8 +28,12 @@ class org_openpsa_calendar_handler_json extends midcom_baseclasses_components_ha
     {
         midcom::get()->auth->require_valid_user();
         $this->root_event = org_openpsa_calendar_interface::find_root_event();
-        $this->load_events($request->query->getInt('start'), $request->query->getInt('end'));
-        $this->add_holidays($request->query->getInt('start'), $request->query->getInt('end'));
+        $from = $request->query->getInt('start');
+        $to = $request->query->getInt('end');
+        // Occurrences beyond the horizon are generated when they're viewed
+        (new org_openpsa_calendar_recurrence)->extend_all($to);
+        $this->load_events($from, $to);
+        $this->add_holidays($from, $to);
         foreach ($this->events as &$event) {
             $event['className'] = implode(' ', $event['className']);
         }
@@ -78,7 +82,8 @@ class org_openpsa_calendar_handler_json extends midcom_baseclasses_components_ha
     private function load_memberships(int $from, int $to) : array
     {
         $user = midcom::get()->auth->user->get_storage();
-        $mc = org_openpsa_calendar_event_member_dba::new_collector('eid.up', $this->root_event->id);
+        $mc = org_openpsa_calendar_event_member_dba::new_collector();
+        org_openpsa_calendar_event_dba::add_calendar_constraint($mc, 'eid');
         // Find all events that occur during [$from, $to]
         $mc->add_constraint('eid.start', '<=', $to);
         $mc->add_constraint('eid.end', '>=', $from);
@@ -162,6 +167,12 @@ class org_openpsa_calendar_handler_json extends midcom_baseclasses_components_ha
             ];
             if ($event->orgOpenpsaAccesstype == org_openpsa_core_acl::ACCESS_PRIVATE) {
                 $this->events[$event->guid]['className'][] = 'private';
+            }
+            if ($event->is_recurring()) {
+                // Can only be edited in calendar clients
+                $this->events[$event->guid]['editable'] = false;
+                $this->events[$event->guid]['recurring'] = true;
+                $this->events[$event->guid]['className'][] = 'recurring';
             }
         }
     }
