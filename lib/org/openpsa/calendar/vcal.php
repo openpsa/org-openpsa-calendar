@@ -177,7 +177,7 @@ class org_openpsa_calendar_vcal
             $this->set_recurrence_id($override, $vevent, $occurrence->recurrenceId);
             $this->set_properties($override, $occurrence, $this->get_values($occurrence), $is_stored);
             $this->set_attendees($override, $occurrence->participants);
-            $declined = array_diff_key(array_filter($master->participants), array_filter($occurrence->participants));
+            $declined = array_diff_key($master->participants, $occurrence->participants);
             foreach (array_keys($declined) as $uid) {
                 $this->add_attendee($override, $uid, 'DECLINED');
             }
@@ -276,12 +276,67 @@ class org_openpsa_calendar_vcal
      */
     public static function get_attendee_ids(VEvent $vevent, bool $skip_declined = false) : array
     {
-        $attendees = $vevent->select('ATTENDEE');
-        if ($skip_declined) {
-            $attendees = array_filter($attendees, fn($attendee) => strtoupper((string) $attendee['PARTSTAT']) !== 'DECLINED');
+        return self::find_persons(array_keys(self::get_attendees($vevent, $skip_declined)));
+    }
+
+    /**
+     * Returns the attendees from the client's copy that are not in our DB
+     *
+     * For occurrences, these are the ones from the override VEVENT if there is one, otherwise
+     * the series' attendees. Declined attendees are left out
+     *
+     * @return array<string, string> email => name (or email, if there is no name)
+     */
+    public static function get_external_attendees(org_openpsa_calendar_event_dba $event) : array
+    {
+        try {
+            $master = $event->get_master();
+        } catch (midcom_error $e) {
+            $e->log();
+            return [];
         }
-        $emails = array_filter(array_map(self::get_email(...), $attendees));
-        return self::find_persons($emails);
+        if (   !($stored = self::read($master->vCalSerialized))
+            || !($vevent = self::get_master($stored))) {
+            return [];
+        }
+        $vevent = self::get_overrides($stored, $vevent)[$event->recurrenceId] ?? $vevent;
+
+        $attendees = [];
+        foreach (self::get_attendees($vevent, true) as $email => $attendee) {
+            $attendees[$email] = trim((string) $attendee['CN']) ?: $email;
+        }
+        return array_diff_key($attendees, self::find_persons(array_keys($attendees)));
+    }
+
+    /**
+     * @return array<int, VEvent> Override VEVENTs by the original start of their occurrence
+     */
+    public static function get_overrides(VCalendar $vcalendar, VEvent $master) : array
+    {
+        $overrides = [];
+        foreach ($vcalendar->select('VEVENT') as $vevent) {
+            if (   $vevent !== $master
+                && isset($vevent->{'RECURRENCE-ID'})
+                && (string) $vevent->UID === (string) $master->UID) {
+                $overrides[self::get_recurrence_id($vevent)] = $vevent;
+            }
+        }
+        return $overrides;
+    }
+
+    /**
+     * @return array<string, Property> ATTENDEE properties by lowercase email address (those without one are left out)
+     */
+    private static function get_attendees(VEvent $vevent, bool $skip_declined) : array
+    {
+        $attendees = [];
+        foreach ($vevent->select('ATTENDEE') as $attendee) {
+            if (   ($email = self::get_email($attendee))
+                && (!$skip_declined || strtoupper((string) $attendee['PARTSTAT']) !== 'DECLINED')) {
+                $attendees[$email] = $attendee;
+            }
+        }
+        return $attendees;
     }
 
     /**
@@ -387,15 +442,10 @@ class org_openpsa_calendar_vcal
      */
     private function set_attendees(VEvent $vevent, array $participants)
     {
-        $stored = [];
-        foreach ($vevent->select('ATTENDEE') as $attendee) {
-            if ($email = self::get_email($attendee)) {
-                $stored[$email] = $attendee;
-            }
-        }
+        $stored = self::get_attendees($vevent, false);
         unset($vevent->ATTENDEE);
 
-        foreach (array_keys(array_filter($participants)) as $uid) {
+        foreach (array_keys($participants) as $uid) {
             $email = $this->get_attendee_email($uid);
             if ($email && isset($stored[strtolower($email)])) {
                 $vevent->add($stored[strtolower($email)]);

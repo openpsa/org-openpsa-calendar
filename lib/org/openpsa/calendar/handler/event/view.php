@@ -6,6 +6,8 @@
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License
  */
 
+use midcom\datamanager\helper\autocomplete;
+use midcom\datamanager\schema;
 use midcom\datamanager\schemadb;
 use midcom\datamanager\datamanager;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,8 +31,8 @@ class org_openpsa_calendar_handler_event_view extends midcom_baseclasses_compone
 
         midcom::get()->skip_page_style = ($handler_id == 'event_view_raw');
 
-        $this->load_datamanager();
         $data['recurrence'] = $this->get_recurrence_info($data['event']);
+        $this->load_datamanager();
 
         // Add toolbar items
         $buttons = [];
@@ -102,8 +104,70 @@ class org_openpsa_calendar_handler_event_view extends midcom_baseclasses_compone
         if (!$this->_request_data['event']->can_do('org.openpsa.calendar:read')) {
             $schema = 'private';
         }
+        $this->prepare_schema($schema ? $schemadb->get($schema) : $schemadb->get_first());
         $this->datamanager = new datamanager($schemadb);
         $this->datamanager->set_storage($this->_request_data['event'], $schema);
+    }
+
+    private function prepare_schema(schema $schema)
+    {
+        $fields = [];
+        foreach ($schema->get('fields') as $name => $config) {
+            if ($name === 'title') {
+                continue;
+            }
+            if (   $name === 'participants'
+                && $external = org_openpsa_calendar_vcal::get_external_attendees($this->_request_data['event'])) {
+                $config = [
+                    'title' => $config['title'],
+                    'storage' => null,
+                    'type' => 'text',
+                    'type_config' => [
+                        'output_mode' => 'html',
+                    ],
+                    'widget' => 'textarea',
+                    'default' => $this->render_participants($external),
+                ];
+            }
+            $fields[$name] = $config;
+            if ($name === 'end' && $recurrence = $this->_request_data['recurrence']) {
+                $value = $recurrence['summary'];
+                if ($recurrence['series_url']) {
+                    $value .= " (<a href=\"{$recurrence['series_url']}\">" . $this->_l10n->get('show series') . '</a>)';
+                }
+                $fields['recurrence'] = [
+                    'title' => 'recurrence',
+                    'storage' => null,
+                    'type' => 'text',
+                    'type_config' => [
+                        'output_mode' => 'html',
+                    ],
+                    'widget' => 'textarea',
+                    'default' => $value,
+                ];
+            }
+        }
+        $schema->set('fields', $fields);
+    }
+
+    /**
+     * @param array<string, string> $external email => name
+     */
+    private function render_participants(array $external) : string
+    {
+        $labels = [];
+        foreach (array_keys($this->_request_data['event']->participants) as $uid) {
+            try {
+                $person = midcom_db_person::get_cached($uid);
+                $labels[] = htmlspecialchars(autocomplete::create_item_label($person, [], 'name'));
+            } catch (midcom_error $e) {
+                $e->log();
+            }
+        }
+        foreach ($external as $email => $label) {
+            $labels[] = '<a href="mailto:' . htmlspecialchars($email) . '">' . htmlspecialchars($label) . '</a>';
+        }
+        return implode(', ', $labels);
     }
 
     /**
